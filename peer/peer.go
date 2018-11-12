@@ -46,7 +46,6 @@ func (msg *Message) Send() {
 	if Dev {
 		log.Println("send")
 	}
-	log.Println(usersConnectionsMap)
 	for user, conn := range usersConnectionsMap {
 		if user == myName {
 			continue
@@ -83,7 +82,6 @@ func RunServer(port string, updateTextCh chan string, updateUserList chan []User
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
-			log.Info(err)
 			continue
 		}
 		go receive(conn)
@@ -102,7 +100,6 @@ func receive(conn net.Conn) {
 		}
 		switch msg.Kind {
 		case "CONNECT":
-			log.Info("kind = connect")
 			if !handleConnect(*msg, conn) {
 				return
 			}
@@ -141,7 +138,6 @@ func handleConnect(msg Message, conn net.Conn) bool {
 	}
 	usersMap[msg.Me.Name] = msg.Me
 	usersConnectionsMap[msg.Me.Name] = conn
-	log.Println(usersConnectionsMap)
 	response.SendToUser(msg.Me.Name, updateTextChan)
 	return true
 }
@@ -170,6 +166,7 @@ func connectToPeers(msg Message) {
 		conn, err := createConnection(user)
 		if err != nil {
 			log.Println(err)
+			log.Println("connectionPeers error")
 			continue
 		}
 		usersMap[user.Name] = user

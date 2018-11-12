@@ -47,7 +47,7 @@ func (ctrl *Control) handleUserInput(input string) {
 		msg.SendToUser(whatever[1], ctrl.UpdatedTextFromUser)
 		ctrl.UpdatedText <- "(private) from " + peer.GetMyName() + ": " + msg.MSG
 	} else {
-		msg := peer.Message{"Public", peer.User{peer.GetMyName(), "", ""}, whatever[0], make([]peer.User, 0)}
+		msg := peer.Message{"PUBLIC", peer.User{peer.GetMyName(), "", ""}, whatever[0], make([]peer.User, 0)}
 		msg.Send()
 		ctrl.UpdatedText <- peer.GetMyName() + ": " + msg.MSG
 	}
