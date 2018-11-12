@@ -7,41 +7,52 @@ import (
 	"os"
 	"strings"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/ryomak/go-p2pchat/control"
 	"github.com/ryomak/go-p2pchat/peer"
+	"github.com/ryomak/go-p2pchat/util"
 )
 
 var (
-	port   = flag.String("p", "1111", "string flag")
-	user   = flag.String("user", "name:192.168.10.1:1111", "string flag")
-	myName = flag.String("name", "ryomak", "string flag")
+	port   = flag.String("p", "1111", "port")
+	user   = flag.String("user", "name@192.168.10.1:1111", "connect user")
+	myName = flag.String("name", "ryomak", "my name ")
+	debug  = flag.Bool("debug", false, "debug mode")
+	public = flag.Bool("public", false, "network")
 )
 var ctrl = control.Control{
 	UpdatedText:         make(chan string, 10),
 	UpdateUserList:      make(chan []peer.User, 10),
-	UpdatedTextFromUser: make(chan string, 10)}
+	UpdatedTextFromUser: make(chan string, 10),
+}
 
 func init() {
 	flag.Parse()
+	if *debug {
+		log.Info("debug mode")
+	} else {
+		log.SetLevel(log.WarnLevel)
+	}
+	if *public {
+		log.Warn("public network")
+	} else {
+		log.Info("private network")
+	}
 	peer.SetMyName(*myName)
 }
 
 func main() {
-	//if *ip != util.GetMyIP() {
-	u := strings.Split(*user, ":")
-	go peer.IntroduceMyself(peer.User{
-		Name: u[0],
-		IP:   u[1],
-		Port: u[2],
-	})
-	//}
+	if peer.GetUserFromStr(*user).IP != util.GetMyIP() || !*public {
+		go peer.IntroduceMyself(peer.GetUserFromStr(*user))
+	}
 	go ctrl.StartControlLoop()
-	ctrl.UpdatedText <- "Hello " + peer.GetMyName() + ".\nFor private messages, type the message followed by * and the name of the receiver.\n To leave the conversation type disconnect"
 	go peer.RunServer(*port, ctrl.UpdatedText, ctrl.UpdateUserList)
 	UserInput()
 }
 
 func UserInput() {
+	fmt.Printf("\x1b[36m%s\x1b[0m", "Hello "+peer.GetMyName()+" from "+util.GetMyIP()+".\nPrivate messages ...'(message)*(user) .\n To leave...'close'")
+	fmt.Println()
 	reader := bufio.NewReader(os.Stdin)
 	for {
 		fmt.Print("-> ")

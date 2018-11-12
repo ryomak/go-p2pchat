@@ -9,13 +9,14 @@ import (
 	"github.com/ryomak/go-p2pchat/util"
 )
 
-var Dev = true
+//node should have var
 var usersConnectionsMap = make(map[string]net.Conn)
 var usersMap = make(map[string]User)
 var myName string
 var myPort string
 
 var (
+	//channel
 	updateTextChan     chan string
 	updateUserListChan chan []User
 )
@@ -43,9 +44,6 @@ func SetMyName(name string) {
 
 //send message to all peer
 func (msg *Message) Send() {
-	if Dev {
-		log.Println("send")
-	}
 	for user, conn := range usersConnectionsMap {
 		if user == myName {
 			continue
@@ -61,12 +59,13 @@ func (msg *Message) SendToUser(receiver string, updateTextStream chan string) {
 		conn := usersConnectionsMap[receiver]
 		enc := json.NewEncoder(conn)
 		enc.Encode(msg)
+		return
 	}
 	updateTextStream <- (receiver + "is not conn")
 }
 
 func RunServer(port string, updateTextCh chan string, updateUserList chan []User) {
-	log.Info("starting 'server'")
+	log.Info("starting :" + port)
 	myPort = port
 	updateTextChan = updateTextCh
 	updateUserListChan = updateUserList
@@ -82,6 +81,7 @@ func RunServer(port string, updateTextCh chan string, updateUserList chan []User
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
+			log.Warn(err)
 			continue
 		}
 		go receive(conn)
@@ -89,7 +89,6 @@ func RunServer(port string, updateTextCh chan string, updateUserList chan []User
 }
 
 func receive(conn net.Conn) {
-	log.Println("receive")
 	defer conn.Close()
 	dec := json.NewDecoder(conn)
 	msg := new(Message)
@@ -100,29 +99,28 @@ func receive(conn net.Conn) {
 		}
 		switch msg.Kind {
 		case "CONNECT":
+			EchoUser("Connect", msg.Me, "Debug")
 			if !handleConnect(*msg, conn) {
 				return
 			}
 		case "PRIVATE":
-			log.Info("kind = private")
+			EchoUser("Private", msg.Me, "Debug")
 			updateTextChan <- "(private) from " + msg.Me.Name + ": " + msg.MSG
 		case "PUBLIC":
-			log.Info("kind = publuic")
+			EchoUser("Public", msg.Me, "Debug")
 			updateTextChan <- msg.Me.Name + ": " + msg.MSG
 		case "DISCONNECT":
-			log.Println("kind = disconnect")
+			EchoUser("Disconnect", msg.Me, "Info")
 			disconnect(*msg)
-		case "HEARTBEAT":
-			log.Println("HEARTBEAT")
-		case "LIST":
-			log.Info("kind = LIST")
+		case "LIST": //connect users by msgUser
+			EchoUser("List", msg.Me, "Debug")
 			connectToPeers(*msg)
 			return
 		case "ADD":
-			log.Info("kind = ADD")
+			EchoUser("Add", msg.Me, "Debug")
 			addPeer(*msg)
 		default:
-			log.Info("unknown message type")
+			log.Warn("unknown message type")
 		}
 	}
 }
@@ -158,15 +156,13 @@ func disconnect(msg Message) {
 	delete(usersMap, msg.Me.Name)
 	delete(usersConnectionsMap, msg.Me.Name)
 	updateUserListChan <- GetFromUserMap(usersMap)
-	updateTextChan <- msg.Me.Name + " left the chat"
+	updateTextChan <- msg.Me.Name + "left the chat"
 }
 
 func connectToPeers(msg Message) {
 	for _, user := range msg.Users {
 		conn, err := createConnection(user)
 		if err != nil {
-			log.Println(err)
-			log.Println("connectionPeers error")
 			continue
 		}
 		usersMap[user.Name] = user
@@ -192,7 +188,6 @@ func createConnection(user User) (net.Conn, error) {
 }
 
 func IntroduceMyself(user User) {
-	log.Println("introduceMyself")
 	conn, err := createConnection(user)
 	if err != nil {
 		log.Println(err)

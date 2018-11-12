@@ -2,17 +2,18 @@ package util
 
 import (
 	"errors"
-	"log"
 	"net"
+
+	log "github.com/Sirupsen/logrus"
 )
 
 func GetMyIP() string {
 	ip, err := myIP()
 	if err != nil {
-		log.Println("could not get my external adress!")
+		log.Fatal("could not get my external adress!")
 		return ""
 	}
-	log.Printf("my IP : %v", ip)
+	log.Info("my IP :", ip)
 	return ip
 }
 
