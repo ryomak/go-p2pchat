@@ -4,7 +4,7 @@ import (
 	"errors"
 	"strings"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 func GetFromUserMap(mapData map[string]User) []User {

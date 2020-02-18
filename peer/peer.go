@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/ryomak/go-p2pchat/util"
 )

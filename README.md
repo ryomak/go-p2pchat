@@ -11,3 +11,4 @@ make run
 - [ ] public mode
 - [ ] node list => all
 - [ ] control
+upnp

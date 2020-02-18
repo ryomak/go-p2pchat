@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/ryomak/go-p2pchat/control"
 	"github.com/ryomak/go-p2pchat/peer"
 	"github.com/ryomak/go-p2pchat/util"
