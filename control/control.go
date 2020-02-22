@@ -5,8 +5,8 @@ import (
 	"os"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/ryomak/go-p2pchat/peer"
+	log "github.com/sirupsen/logrus"
 )
 
 type Control struct {

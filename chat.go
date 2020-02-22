@@ -7,10 +7,10 @@ import (
 	"os"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/ryomak/go-p2pchat/control"
 	"github.com/ryomak/go-p2pchat/peer"
 	"github.com/ryomak/go-p2pchat/util"
+	log "github.com/sirupsen/logrus"
 )
 
 var (
